@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,7 +47,7 @@
       color: #d1d5db;
     }
 
-    input {
+    input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px 14px;
       margin-bottom: 18px;
@@ -59,13 +59,12 @@
       outline: none;
     }
 
-    input:focus {
+    input[type="text"]:focus, input[type="password"]:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     button {
-      width: 100%;
       padding: 12px;
       border: 0;
       border-radius: 10px;
@@ -74,9 +73,12 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     button:hover { background: #1d4ed8; }
+
+    .login-btn { width: 100%; }
 
     .error {
       color: #f87171;
@@ -86,6 +88,7 @@
       text-align: center;
     }
 
+    /* Dashboard Styles */
     .dashboard {
       display: none;
       max-width: 900px;
@@ -97,7 +100,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 16px;
       margin-top: 24px;
     }
@@ -115,10 +118,48 @@
     }
 
     .card p {
-      margin: 0;
+      margin: 0 0 15px 0;
       color: #9ca3af;
       font-size: 14px;
     }
+
+    /* File Upload specific styles */
+    .file-upload-wrapper {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .file-upload-wrapper input[type="file"] {
+      flex: 1;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .file-upload-wrapper button {
+      font-size: 14px;
+      padding: 8px 15px;
+      white-space: nowrap;
+    }
+
+    ul#fileList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    ul#fileList li {
+      background: #0b1220;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-meta { color: #6b7280; font-size: 11px; }
 
     .logout {
       margin-top: 24px;
@@ -132,53 +173,65 @@
 </head>
 <body>
 
-  <!-- 登录界面 -->
+  <!-- Login Screen -->
   <div class="login-card" id="loginView">
     <h1>☁️ Cloud Platform</h1>
-    <p class="subtitle">请使用 ID 和密码登录</p>
+    <p class="subtitle">Sign in with your ID and password</p>
 
     <form id="loginForm">
-      <label for="userId">ID / 用户名</label>
-      <input id="userId" type="text" placeholder="请输入 ID" autocomplete="username" required />
+      <label for="userId">ID / Username</label>
+      <input id="userId" type="text" placeholder="Enter your ID" autocomplete="username" required />
 
-      <label for="password">密码</label>
-      <input id="password" type="password" placeholder="请输入密码" autocomplete="current-password" required />
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
 
       <div class="error" id="errorMsg"></div>
 
-      <button type="submit">登录</button>
+      <button type="submit" class="login-btn">Sign In</button>
     </form>
   </div>
 
-  <!-- 登录后的控制台占位 -->
+  <!-- Dashboard -->
   <div class="dashboard" id="dashboardView">
-    <h1>☁️ 云平台控制台</h1>
-    <p style="color:#9ca3af;">欢迎回来，<span id="currentUser"></span></p>
+    <h1>☁️ Cloud Dashboard</h1>
+    <p style="color:#9ca3af;">Welcome back, <span id="currentUser" style="color:#3b82f6; font-weight:bold;"></span></p>
 
     <div class="grid">
       <div class="card">
-        <h3>🖥️ 云服务器</h3>
-        <p>管理你的虚拟机实例。</p>
+        <h3>🖥️ Cloud Servers</h3>
+        <p>Manage your virtual machine instances.</p>
       </div>
+      
+      <!-- File Storage Card -->
       <div class="card">
-        <h3>💾 对象存储</h3>
-        <p>上传和管理文件。</p>
+        <h3>💾 Object Storage</h3>
+        <p>Upload and manage files (Saved locally).</p>
+        
+        <div class="file-upload-wrapper">
+          <input type="file" id="fileInput" />
+          <button id="uploadBtn">Upload</button>
+        </div>
+        <ul id="fileList">
+          <!-- Uploaded files will appear here -->
+        </ul>
       </div>
+
       <div class="card">
-        <h3>🗄️ 数据库</h3>
-        <p>创建和管理数据库实例。</p>
+        <h3>🗄️ Databases</h3>
+        <p>Create and manage database instances.</p>
       </div>
+      
       <div class="card">
-        <h3>📊 监控</h3>
-        <p>查看资源使用情况。</p>
+        <h3>📊 Monitoring</h3>
+        <p>View resource usage and metrics.</p>
       </div>
     </div>
 
-    <button class="logout" id="logoutBtn">退出登录</button>
+    <button class="logout" id="logoutBtn">Sign Out</button>
   </div>
 
   <script>
-    // ⚠️ 仅用于前端演示，真实项目必须由后端认证
+    // ⚠️ DEMO ONLY: Frontend verification (not secure for real apps)
     const DEMO_ID = "admin";
     const DEMO_PASSWORD = "123456";
 
@@ -189,9 +242,9 @@
     const currentUser = document.getElementById("currentUser");
     const logoutBtn = document.getElementById("logoutBtn");
 
+    // Auth Logic
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
-
       const id = document.getElementById("userId").value.trim();
       const password = document.getElementById("password").value;
 
@@ -200,8 +253,9 @@
         currentUser.textContent = id;
         loginView.style.display = "none";
         dashboardView.style.display = "block";
+        loadFiles(); // Load saved files when logging in
       } else {
-        errorMsg.textContent = "ID 或密码错误，请重试。";
+        errorMsg.textContent = "Invalid ID or password.";
       }
     });
 
@@ -211,6 +265,76 @@
       loginForm.reset();
       errorMsg.textContent = "";
     });
+
+    // ==========================================
+    // File Storage Logic (Using LocalStorage)
+    // ==========================================
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileList = document.getElementById("fileList");
+
+    // Function to render files
+    function loadFiles() {
+      fileList.innerHTML = "";
+      const files = JSON.parse(localStorage.getItem("cloudFiles")) || [];
+      
+      if (files.length === 0) {
+        fileList.innerHTML = "<li>No files uploaded yet.</li>";
+        return;
+      }
+
+      files.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div>
+            <div style="color:#e5e7eb;">📄 ${file.name}</div>
+            <div class="file-meta">${(file.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <button onclick="deleteFile(${index})" style="background:#ef4444; padding:4px 8px; font-size:12px; border-radius:6px;">X</button>
+        `;
+        fileList.appendChild(li);
+      });
+    }
+
+    // Function to handle file upload
+    uploadBtn.addEventListener("click", () => {
+      const file = fileInput.files[0];
+      if (!file) return alert("Please select a file first.");
+
+      // GitHub pages / LocalStorage has a strict size limit (usually ~5MB total)
+      if (file.size > 2 * 1024 * 1024) {
+        return alert("File is too large! Please select a file under 2MB for this demo.");
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const fileData = {
+          name: file.name,
+          size: file.size,
+          data: e.target.result // Base64 string
+        };
+
+        const existingFiles = JSON.parse(localStorage.getItem("cloudFiles")) || [];
+        existingFiles.push(fileData);
+        
+        try {
+          localStorage.setItem("cloudFiles", JSON.stringify(existingFiles));
+          fileInput.value = ""; // clear input
+          loadFiles(); // refresh list
+        } catch (err) {
+          alert("Storage is full! Please delete some files.");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Global function to delete a file
+    window.deleteFile = function(index) {
+      const files = JSON.parse(localStorage.getItem("cloudFiles")) || [];
+      files.splice(index, 1);
+      localStorage.setItem("cloudFiles", JSON.stringify(files));
+      loadFiles();
+    };
   </script>
 </body>
 </html>
