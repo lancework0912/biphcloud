@@ -3,149 +3,261 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Real Cloud Platform</title>
+  <title>OneDrive Clone - Cloud Storage</title>
   <style>
-    * { box-sizing: border-box; }
+    /* OneDrive Light Theme Colors */
+    :root {
+      --ms-blue: #0078d4;
+      --ms-blue-hover: #106ebe;
+      --bg-main: #ffffff;
+      --bg-sidebar: #faf9f8;
+      --bg-hover: #f3f2f1;
+      --text-main: #323130;
+      --text-muted: #605e5c;
+      --border-color: #edebe9;
+      --shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* --- AUTH VIEW (Microsoft Login Style) --- */
+    #authView {
       display: flex;
       align-items: center;
       justify-content: center;
+      height: 100vh;
+      background-color: #f2f2f2;
     }
-
-    /* Auth Styles */
     .auth-card {
+      background: #fff;
+      padding: 44px;
       width: 100%;
-      max-width: 400px;
-      background: #111827;
-      border: 1px solid #1f2937;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      max-width: 440px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    h1 { margin: 0 0 8px; font-size: 24px; text-align: center; }
-    .subtitle { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 28px; }
-    label { display: block; font-size: 14px; margin-bottom: 6px; color: #d1d5db; }
-    input {
-      width: 100%; padding: 12px 14px; margin-bottom: 18px; border-radius: 10px;
-      border: 1px solid #374151; background: #0b1220; color: #e5e7eb; font-size: 15px; outline: none;
+    .auth-logo { font-size: 24px; font-weight: 600; color: #5e5e5e; margin-bottom: 20px; }
+    .auth-logo span { color: var(--ms-blue); font-weight: bold; }
+    .auth-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; }
+    .auth-card input {
+      width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ccc;
+      border-radius: 0; font-size: 15px; outline: none;
     }
-    input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-    button {
-      padding: 12px; border: 0; border-radius: 10px; background: #2563eb;
-      color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    .auth-card input:focus { border-color: var(--ms-blue); }
+    .auth-card button {
+      background: var(--ms-blue); color: white; border: none; padding: 10px 24px;
+      font-size: 15px; cursor: pointer; width: 100%; font-weight: 600;
     }
-    button:hover { background: #1d4ed8; }
-    .btn-full { width: 100%; }
-    .btn-secondary { background: #374151; }
-    .btn-secondary:hover { background: #4b5563; }
-    .btn-sm { padding: 8px 12px; font-size: 14px; }
-    .error { color: #f87171; font-size: 14px; min-height: 20px; margin-bottom: 12px; text-align: center; }
-    .toggle-auth { text-align: center; margin-top: 16px; font-size: 14px; color: #9ca3af; }
-    .toggle-auth span { color: #3b82f6; cursor: pointer; text-decoration: underline; }
+    .auth-card button:hover { background: var(--ms-blue-hover); }
+    .auth-error { color: #a80000; font-size: 14px; margin-bottom: 12px; }
+    .toggle-auth { margin-top: 20px; font-size: 14px; }
+    .toggle-auth span { color: var(--ms-blue); cursor: pointer; }
+    .toggle-auth span:hover { text-decoration: underline; }
 
-    /* Dashboard Styles */
-    #dashboardView { display: none; max-width: 900px; width: 100%; padding: 28px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .header h1 { text-align: left; margin: 0; }
-    
-    /* Storage Meter */
-    .storage-meter-container {
-      background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 16px; margin-bottom: 20px;
+    /* --- DASHBOARD LAYOUT --- */
+    #dashboardView {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
     }
-    .storage-text { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: #9ca3af; }
-    .storage-bar { width: 100%; height: 8px; background: #0b1220; border-radius: 4px; overflow: hidden; }
-    .storage-fill { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
 
-    .explorer-container {
-      background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 20px;
+    /* Top Header */
+    .top-header {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-main);
     }
-    .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .toolbar input { margin-bottom: 0; flex: 1; min-width: 200px; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-logo { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+    .header-logo span { color: var(--ms-blue); font-weight: bold; }
+    .search-bar {
+      background: var(--bg-sidebar); border: 1px solid var(--border-color);
+      padding: 6px 12px; border-radius: 4px; width: 300px; font-size: 14px;
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .user-avatar {
+      width: 32px; height: 32px; background: var(--ms-blue); color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 14px; cursor: pointer;
+    }
+
+    /* Main Body Layout */
+    .main-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding-top: 10px;
+    }
+    .sidebar-item {
+      padding: 10px 24px; font-size: 14px; cursor: pointer; color: var(--text-main);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-item:hover { background: var(--bg-hover); }
+    .sidebar-item.active { background: #e1dfdd; font-weight: 600; }
+
+    /* Storage Meter in Sidebar */
+    .storage-widget {
+      margin-top: auto; padding: 16px 24px; border-top: 1px solid var(--border-color);
+    }
+    .storage-widget p { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .storage-bar-bg { height: 8px; background: #edebe9; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+    .storage-bar-fill { height: 100%; background: var(--ms-blue); width: 0%; transition: width 0.3s; }
+    .storage-text { font-size: 12px; color: var(--text-muted); }
+
+    /* Content Area */
+    .content-area {
+      flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 16px 24px;
+    }
+
+    /* Toolbar (New, Upload, etc) */
+    .toolbar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .btn-primary {
+      background: var(--ms-blue); color: white; border: none; padding: 8px 16px;
+      border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { background: var(--ms-blue-hover); }
+    .btn-secondary {
+      background: white; color: var(--text-main); border: 1px solid var(--border-color);
+      padding: 8px 16px; border-radius: 4px; font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--bg-hover); }
+    .btn-icon { padding: 8px; border: none; background: transparent; cursor: pointer; font-size: 16px;}
+    .btn-icon:hover { background: var(--bg-hover); border-radius: 4px;}
+
+    /* Breadcrumb */
+    .breadcrumb {
+      font-size: 14px; color: var(--ms-blue); margin-bottom: 16px; display: flex; align-items: center; gap: 4px;
+    }
+    .breadcrumb span { cursor: pointer; }
+    .breadcrumb span:hover { text-decoration: underline; }
+    .breadcrumb .separator { color: var(--text-muted); cursor: default; margin: 0 4px; }
+    .breadcrumb .separator:hover { text-decoration: none; }
+
+    /* File List Table */
+    .file-table-header {
+      display: flex; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .col-name { flex: 1; padding-left: 8px; }
+    .col-modified { width: 200px; }
+    .col-size { width: 100px; }
+    .col-actions { width: 80px; text-align: right; padding-right: 8px;}
+
+    .file-row {
+      display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg-hover);
+      font-size: 14px;
+    }
+    .file-row:hover { background-color: var(--bg-hover); }
+    .file-row .col-name { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .folder-icon { color: #f3b23e; font-size: 18px; } /* Yellow folder */
+    .file-icon { color: #0078d4; font-size: 18px; }
     
-    .file-list { list-style: none; padding: 0; margin: 0; }
-    .file-list li {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px; background: #0b1220; border: 1px solid #1f2937; border-radius: 8px; margin-bottom: 8px;
+    .action-btn {
+      background: none; border: none; cursor: pointer; font-size: 14px; color: var(--text-muted); padding: 4px;
     }
-    .file-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .folder-item .file-info:hover { color: #3b82f6; }
-    .badge { background: #1e40af; color: #93c5fd; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+    .action-btn:hover { color: var(--ms-blue); }
     
-    /* Loading Screen */
-    #loadingScreen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #0f172a; display: flex; align-items: center; justify-content: center;
-      z-index: 9999; font-size: 20px; color: #3b82f6;
-    }
+    .loading-state { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
   </style>
 </head>
 <body>
 
-  <!-- Initial Loading Screen -->
-  <div id="loadingScreen">Checking session... ☁️</div>
-
   <!-- AUTH VIEW -->
-  <div class="auth-card" id="authView" style="display: none;">
-    <h1>☁️ Real Cloud</h1>
-    <p class="subtitle" id="authSubtitle">Sign in to your account</p>
-    
-    <div class="error" id="authError"></div>
-
-    <form id="authForm">
-      <label for="email">Email</label>
-      <input id="email" type="email" placeholder="you@example.com" required />
+  <div id="authView">
+    <div class="auth-card">
+      <div class="auth-logo">☁️ <span>OneDrive</span> Clone</div>
+      <h1 id="authTitle">Sign in</h1>
+      <div class="auth-error" id="authError"></div>
       
-      <label for="password">Password</label>
-      <input id="password" type="password" placeholder="••••••••" required />
+      <form id="authForm">
+        <input id="email" type="email" placeholder="Email, phone, or Skype" required />
+        <input id="password" type="password" placeholder="Password" required />
+        <button type="submit" id="authSubmitBtn">Sign in</button>
+      </form>
       
-      <button type="submit" class="btn-full" id="authSubmitBtn">Sign In</button>
-    </form>
-
-    <div class="toggle-auth">
-      <span id="toggleAuthMode">Need an account? Register</span>
+      <div class="toggle-auth">
+        <span id="toggleAuthMode">No account? Create one!</span>
+      </div>
     </div>
   </div>
 
   <!-- DASHBOARD VIEW -->
   <div id="dashboardView">
-    <div class="header">
-      <div>
-        <h1>☁️ Your Cloud</h1>
-        <p style="color:#9ca3af; margin:4px 0 0 0; font-size:14px;">Logged in as: <span id="userEmail" style="color:#3b82f6;"></span></p>
+    <!-- Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="header-logo">☁️ <span>OneDrive</span></div>
+        <input type="text" class="search-bar" placeholder="Search your files..." />
       </div>
-      <button class="btn-secondary btn-sm" id="logoutBtn">Sign Out</button>
-    </div>
+      <div class="header-right">
+        <span style="font-size: 13px; color: var(--text-muted);" id="userEmail"></span>
+        <div class="user-avatar" title="Sign Out" id="logoutBtn">U</div>
+      </div>
+    </header>
 
-    <!-- Storage Meter (Displays 1 TB limit visually) -->
-    <div class="storage-meter-container">
-      <div class="storage-text">
-        <span>Folder Storage Used</span>
-        <span id="storageText">0 KB / 1 TB</span>
-      </div>
-      <div class="storage-bar">
-        <div class="storage-fill" id="storageFill"></div>
-      </div>
-    </div>
-
-    <div class="explorer-container">
-      <div class="toolbar">
-        <button class="btn-secondary btn-sm" id="backBtn" style="display:none;">⬅ Back</button>
-        <input type="text" id="folderNameInput" placeholder="New folder name..." style="flex: 0 1 200px;" />
-        <button class="btn-secondary btn-sm" id="createFolderBtn">Create Folder</button>
+    <div class="main-body">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-item active">📁 My files</div>
+        <div class="sidebar-item">🕒 Recent</div>
+        <div class="sidebar-item">📸 Photos</div>
+        <div class="sidebar-item">👥 Shared</div>
         
-        <input type="file" id="fileInput" style="display: none;" />
-        <button class="btn-sm" id="uploadBtn">Upload File</button>
-      </div>
+        <!-- 1 TB Storage Widget -->
+        <div class="storage-widget">
+          <p>Storage</p>
+          <div class="storage-bar-bg">
+            <div class="storage-bar-fill" id="storageFill"></div>
+          </div>
+          <div class="storage-text" id="storageText">0 KB of 1 TB used</div>
+        </div>
+      </aside>
 
-      <div id="loadingText" style="display:none; color:#9ca3af; text-align:center;">Loading...</div>
-      <ul class="file-list" id="fileList">
-        <!-- Files and folders render here -->
-      </ul>
+      <!-- Main Content -->
+      <main class="content-area">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <button class="btn-primary" id="createFolderBtn">➕ New folder</button>
+          <button class="btn-secondary" id="uploadBtn">⬆️ Upload</button>
+          <input type="file" id="fileInput" style="display: none;" />
+          <button class="btn-icon" id="refreshBtn" title="Refresh">🔄</button>
+        </div>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+          <span onclick="navigateToRoot()">My files</span>
+        </div>
+
+        <!-- File List -->
+        <div class="file-table-header">
+          <div class="col-name">Name</div>
+          <div class="col-size">Size</div>
+          <div class="col-actions"></div>
+        </div>
+        
+        <div id="loadingText" class="loading-state" style="display: none;">Loading...</div>
+        <div id="fileList">
+          <!-- Files render here -->
+        </div>
+      </main>
     </div>
   </div>
 
@@ -164,24 +276,19 @@
     const MAX_STORAGE_BYTES = 1099511627776; 
 
     // DOM Elements
-    const loadingScreen = document.getElementById('loadingScreen');
     const authView = document.getElementById('authView');
     const dashboardView = document.getElementById('dashboardView');
     const authForm = document.getElementById('authForm');
     const authError = document.getElementById('authError');
-    const authSubtitle = document.getElementById('authSubtitle');
+    const authTitle = document.getElementById('authTitle');
     const authSubmitBtn = document.getElementById('authSubmitBtn');
     const toggleAuthMode = document.getElementById('toggleAuthMode');
     const userEmailSpan = document.getElementById('userEmail');
     const logoutBtn = document.getElementById('logoutBtn');
     
     const fileList = document.getElementById('fileList');
-    const folderNameInput = document.getElementById('folderNameInput');
-    const createFolderBtn = document.getElementById('createFolderBtn');
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const backBtn = document.getElementById('backBtn');
     const loadingText = document.getElementById('loadingText');
+    const breadcrumb = document.getElementById('breadcrumb');
     const storageText = document.getElementById('storageText');
     const storageFill = document.getElementById('storageFill');
 
@@ -189,54 +296,50 @@
     let isLoginMode = true;
     let currentUser = null;
     let currentPath = ''; 
+    let pathSegments = []; // e.g. ['My files', 'Work', 'Project A']
 
-    // --- INITIALIZATION & AUTHENTICATION ---
-    
-    // 1. Check if user is already logged in (Remember Me functionality)
+    // --- AUTHENTICATION ---
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
       handleAuthState(session);
     }
 
-    // 2. Listen for login/logout events
     supabase.auth.onAuthStateChange((event, session) => {
       handleAuthState(session);
     });
 
     function handleAuthState(session) {
-      loadingScreen.style.display = 'none'; // Hide loading screen
-
       if (session) {
         currentUser = session.user;
         userEmailSpan.textContent = currentUser.email;
+        document.querySelector('.user-avatar').textContent = currentUser.email.charAt(0).toUpperCase();
+        
         authView.style.display = 'none';
-        dashboardView.style.display = 'block';
-        currentPath = `${currentUser.id}/`; 
-        backBtn.style.display = 'none';
-        loadFiles();
+        dashboardView.style.display = 'flex';
+        
+        navigateToRoot(); // Reset path on login
       } else {
         currentUser = null;
-        authView.style.display = 'block';
+        authView.style.display = 'flex';
         dashboardView.style.display = 'none';
         authForm.reset();
         fileList.innerHTML = '';
-        currentPath = '';
       }
     }
 
-    init(); // Run session check on page load
+    init();
 
     toggleAuthMode.addEventListener('click', () => {
       isLoginMode = !isLoginMode;
       authError.textContent = '';
       if (isLoginMode) {
-        authSubtitle.textContent = 'Sign in to your account';
-        authSubmitBtn.textContent = 'Sign In';
-        toggleAuthMode.textContent = 'Need an account? Register';
+        authTitle.textContent = 'Sign in';
+        authSubmitBtn.textContent = 'Sign in';
+        toggleAuthMode.textContent = 'No account? Create one!';
       } else {
-        authSubtitle.textContent = 'Create a new account';
-        authSubmitBtn.textContent = 'Register';
-        toggleAuthMode.textContent = 'Already have an account? Sign In';
+        authTitle.textContent = 'Create account';
+        authSubmitBtn.textContent = 'Create account';
+        toggleAuthMode.textContent = 'Already have an account? Sign in';
       }
     });
 
@@ -260,7 +363,7 @@
       } catch (error) {
         authError.textContent = error.message;
       } finally {
-        authSubmitBtn.textContent = isLoginMode ? 'Sign In' : 'Register';
+        authSubmitBtn.textContent = isLoginMode ? 'Sign in' : 'Create account';
         authSubmitBtn.disabled = false;
       }
     });
@@ -269,7 +372,7 @@
       await supabase.auth.signOut();
     });
 
-    // --- FILE STORAGE & FOLDER LOGIC ---
+    // --- FILE STORAGE & FOLDERS ---
     
     async function loadFiles() {
       fileList.innerHTML = '';
@@ -287,122 +390,162 @@
       }
 
       if (data.length === 0) {
-        fileList.innerHTML = '<li style="justify-content:center; color:#6b7280; padding: 20px;">This folder is empty.</li>';
-        updateStorageMeter(0); // Reset meter if empty
+        fileList.innerHTML = '<div class="loading-state">This folder is empty.</div>';
+        updateStorageMeter(0); 
         return;
       }
 
       let currentFolderSize = 0;
 
-      data.forEach(item => {
-        const li = document.createElement('li');
+      // Remove '.placeholder' files from the visual list (they are used to create folders)
+      const displayData = data.filter(item => item.name !== '.placeholder');
+
+      displayData.forEach(item => {
         const isFolder = item.id === null;
+        const row = document.createElement('div');
+        row.className = 'file-row';
 
         if (isFolder) {
-          li.className = 'folder-item';
-          li.innerHTML = `
-            <div class="file-info" onclick="navigateFolder('${item.name}')">
-              <span>📁 ${item.name}</span>
+          row.innerHTML = `
+            <div class="col-name" onclick="navigateFolder('${item.name}')">
+              <span class="folder-icon">📁</span> ${item.name}
+            </div>
+            <div class="col-size">-</div>
+            <div class="col-actions">
+              <button class="action-btn" onclick="event.stopPropagation(); deleteFile('${item.name}')" title="Delete Folder">🗑️</button>
             </div>
           `;
         } else {
           const size = item.metadata.size;
-          currentFolderSize += size; // Add to folder total
+          currentFolderSize += size; 
 
-          li.innerHTML = `
-            <div class="file-info">
-              <span>📄 ${item.name}</span>
-              <span class="badge">${(size / 1024).toFixed(1)} KB</span>
+          row.innerHTML = `
+            <div class="col-name">
+              <span class="file-icon">📄</span> ${item.name}
             </div>
-            <div>
-               <a href="${getPublicUrl(currentPath + item.name)}" target="_blank" style="color:#3b82f6; text-decoration:none; font-size:13px; margin-right:10px;">Download</a>
-               <button class="btn-secondary btn-sm" onclick="deleteFile('${item.name}')" style="background:#ef4444; padding:4px 8px; font-size:12px;">X</button>
+            <div class="col-size">${(size / 1024).toFixed(1)} KB</div>
+            <div class="col-actions">
+               <a href="${getPublicUrl(currentPath + item.name)}" target="_blank" class="action-btn" style="text-decoration:none;" title="Download">⬇️</a>
+               <button class="action-btn" onclick="deleteFile('${item.name}')" title="Delete">🗑️</button>
             </div>
           `;
         }
-        fileList.appendChild(li);
+        fileList.appendChild(row);
       });
 
-      // Update the storage meter based on current folder size
       updateStorageMeter(currentFolderSize);
     }
 
     function updateStorageMeter(usedBytes) {
-      // Convert bytes to a readable format
       let usedText = "";
       if (usedBytes === 0) usedText = "0 KB";
       else if (usedBytes < 1024 * 1024) usedText = (usedBytes / 1024).toFixed(1) + " KB";
       else usedText = (usedBytes / (1024 * 1024)).toFixed(2) + " MB";
 
-      storageText.textContent = `${usedText} / 1 TB`;
+      storageText.textContent = `${usedText} of 1 TB used`;
       
-      // Calculate percentage
       let percentage = (usedBytes / MAX_STORAGE_BYTES) * 100;
-      if (percentage < 1) percentage = 1; // Make sure a tiny file shows at least a sliver
+      if (percentage < 1 && usedBytes > 0) percentage = 1; // Show a tiny sliver for small files
       if (percentage > 100) percentage = 100;
       
       storageFill.style.width = `${percentage}%`;
     }
 
-    window.navigateFolder = (folderName) => {
-      currentPath += `${folderName}/`;
-      backBtn.style.display = 'inline-block';
+    // Navigation Logic
+    function updateBreadcrumb() {
+      breadcrumb.innerHTML = '';
+      
+      // Root item
+      const rootSpan = document.createElement('span');
+      rootSpan.textContent = 'My files';
+      rootSpan.onclick = navigateToRoot;
+      breadcrumb.appendChild(rootSpan);
+
+      // Add subfolders
+      pathSegments.forEach((segment, index) => {
+        const sep = document.createElement('span');
+        sep.className = 'separator';
+        sep.textContent = '›';
+        breadcrumb.appendChild(sep);
+
+        const span = document.createElement('span');
+        span.textContent = segment;
+        span.onclick = () => navigateToSegment(index);
+        breadcrumb.appendChild(span);
+      });
+    }
+
+    window.navigateToRoot = () => {
+      currentPath = `${currentUser.id}/`;
+      pathSegments = [];
+      updateBreadcrumb();
       loadFiles();
     };
 
-    backBtn.addEventListener('click', () => {
-      const parts = currentPath.split('/').filter(p => p !== '');
-      parts.pop(); 
-      
-      if (parts.length <= 1) { 
-        currentPath = `${currentUser.id}/`;
-        backBtn.style.display = 'none';
-      } else {
-        currentPath = parts.join('/') + '/';
-      }
+    window.navigateFolder = (folderName) => {
+      currentPath += `${folderName}/`;
+      pathSegments.push(folderName);
+      updateBreadcrumb();
       loadFiles();
-    });
+    };
 
-    createFolderBtn.addEventListener('click', async () => {
-      const folderName = folderNameInput.value.trim();
-      if (!folderName) return alert("Enter a folder name.");
+    window.navigateToSegment = (index) => {
+      // Rebuild path up to the clicked segment
+      const newSegments = pathSegments.slice(0, index + 1);
+      currentPath = `${currentUser.id}/` + newSegments.map(s => `${s}/`).join('');
+      pathSegments = newSegments;
+      updateBreadcrumb();
+      loadFiles();
+    };
+
+    // Action Buttons
+    document.getElementById('refreshBtn').addEventListener('click', loadFiles);
+
+    document.getElementById('createFolderBtn').addEventListener('click', async () => {
+      const folderName = prompt("Enter new folder name:");
+      if (!folderName || folderName.trim() === '') return;
       
       const dummyFile = new File([''], '.placeholder', { type: 'text/plain' });
       const { error } = await supabase.storage.from(BUCKET_NAME).upload(`${currentPath}${folderName}/.placeholder`, dummyFile);
       
       if (error) alert("Error creating folder: " + error.message);
-      else {
-        folderNameInput.value = '';
-        loadFiles();
-      }
+      else loadFiles();
     });
 
-    uploadBtn.addEventListener('click', () => {
-      fileInput.click(); 
-    });
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files[0];
       if (!file) return;
 
-      const originalText = uploadBtn.textContent;
-      uploadBtn.textContent = 'Uploading...';
+      const originalHtml = uploadBtn.innerHTML;
+      uploadBtn.innerHTML = '⏳ Uploading...';
       uploadBtn.disabled = true;
 
-      // Note: Supabase Free tier enforces a 50MB per-file limit and 1GB total limit.
       const { error } = await supabase.storage.from(BUCKET_NAME).upload(`${currentPath}${file.name}`, file);
 
-      uploadBtn.textContent = originalText;
+      uploadBtn.innerHTML = originalHtml;
       uploadBtn.disabled = false;
       fileInput.value = ''; 
 
-      if (error) alert("Upload failed: " + error.message + "\n(Note: Free Supabase limit is usually 50MB per file).");
+      if (error) alert("Upload failed: " + error.message + "\n(Note: Free Supabase limit is 50MB per file).");
       else loadFiles();
     });
 
     window.deleteFile = async (fileName) => {
-      if (!confirm(`Delete ${fileName}?`)) return;
-      const { error } = await supabase.storage.from(BUCKET_NAME).remove([`${currentPath}${fileName}`]);
+      if (!confirm(`Are you sure you want to delete '${fileName}'?`)) return;
+      
+      // If it's a folder, we might need to delete its contents first. 
+      // For this basic setup, Supabase handles folder deletion if you pass the folder path.
+      let target = fileName;
+      const isFolder = !fileName.includes('.'); // Basic check
+      if(isFolder) target = `${fileName}/.placeholder`; // Delete the placeholder to remove the folder
+
+      const { error } = await supabase.storage.from(BUCKET_NAME).remove([`${currentPath}${target}`]);
+      
       if (error) alert("Delete failed: " + error.message);
       else loadFiles();
     };
@@ -411,7 +554,6 @@
       const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
       return data.publicUrl;
     }
-
   </script>
 </body>
 </html>
