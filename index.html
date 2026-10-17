@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Platform Login</title>
+  <title>Real Cloud Platform</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -17,7 +17,8 @@
       justify-content: center;
     }
 
-    .login-card {
+    /* Auth Styles */
+    .auth-card {
       width: 100%;
       max-width: 400px;
       background: #111827;
@@ -26,315 +27,391 @@
       padding: 32px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      text-align: center;
+    h1 { margin: 0 0 8px; font-size: 24px; text-align: center; }
+    .subtitle { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 28px; }
+    label { display: block; font-size: 14px; margin-bottom: 6px; color: #d1d5db; }
+    input {
+      width: 100%; padding: 12px 14px; margin-bottom: 18px; border-radius: 10px;
+      border: 1px solid #374151; background: #0b1220; color: #e5e7eb; font-size: 15px; outline: none;
     }
-
-    .subtitle {
-      text-align: center;
-      color: #9ca3af;
-      font-size: 14px;
-      margin-bottom: 28px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 6px;
-      color: #d1d5db;
-    }
-
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 18px;
-      border-radius: 10px;
-      border: 1px solid #374151;
-      background: #0b1220;
-      color: #e5e7eb;
-      font-size: 15px;
-      outline: none;
-    }
-
-    input[type="text"]:focus, input[type="password"]:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
+    input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
     button {
-      padding: 12px;
-      border: 0;
-      border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
+      padding: 12px; border: 0; border-radius: 10px; background: #2563eb;
+      color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
-
     button:hover { background: #1d4ed8; }
-
-    .login-btn { width: 100%; }
-
-    .error {
-      color: #f87171;
-      font-size: 14px;
-      min-height: 20px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
+    .btn-full { width: 100%; }
+    .btn-secondary { background: #374151; }
+    .btn-secondary:hover { background: #4b5563; }
+    .btn-sm { padding: 8px 12px; font-size: 14px; }
+    .error { color: #f87171; font-size: 14px; min-height: 20px; margin-bottom: 12px; text-align: center; }
+    .toggle-auth { text-align: center; margin-top: 16px; font-size: 14px; color: #9ca3af; }
+    .toggle-auth span { color: #3b82f6; cursor: pointer; text-decoration: underline; }
 
     /* Dashboard Styles */
-    .dashboard {
-      display: none;
-      max-width: 900px;
-      width: 100%;
-      padding: 28px;
+    #dashboardView { display: none; max-width: 900px; width: 100%; padding: 28px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .header h1 { text-align: left; margin: 0; }
+    
+    /* Storage Meter */
+    .storage-meter-container {
+      background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 16px; margin-bottom: 20px;
     }
+    .storage-text { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: #9ca3af; }
+    .storage-bar { width: 100%; height: 8px; background: #0b1220; border-radius: 4px; overflow: hidden; }
+    .storage-fill { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
 
-    .dashboard h1 { text-align: left; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 24px;
+    .explorer-container {
+      background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 20px;
     }
-
-    .card {
-      background: #111827;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      padding: 20px;
+    .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .toolbar input { margin-bottom: 0; flex: 1; min-width: 200px; }
+    
+    .file-list { list-style: none; padding: 0; margin: 0; }
+    .file-list li {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px; background: #0b1220; border: 1px solid #1f2937; border-radius: 8px; margin-bottom: 8px;
     }
-
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 16px;
+    .file-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .folder-item .file-info:hover { color: #3b82f6; }
+    .badge { background: #1e40af; color: #93c5fd; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+    
+    /* Loading Screen */
+    #loadingScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #0f172a; display: flex; align-items: center; justify-content: center;
+      z-index: 9999; font-size: 20px; color: #3b82f6;
     }
-
-    .card p {
-      margin: 0 0 15px 0;
-      color: #9ca3af;
-      font-size: 14px;
-    }
-
-    /* File Upload specific styles */
-    .file-upload-wrapper {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .file-upload-wrapper input[type="file"] {
-      flex: 1;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-
-    .file-upload-wrapper button {
-      font-size: 14px;
-      padding: 8px 15px;
-      white-space: nowrap;
-    }
-
-    ul#fileList {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      font-size: 13px;
-    }
-
-    ul#fileList li {
-      background: #0b1220;
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .file-meta { color: #6b7280; font-size: 11px; }
-
-    .logout {
-      margin-top: 24px;
-      width: auto;
-      padding: 10px 18px;
-      background: #374151;
-    }
-
-    .logout:hover { background: #4b5563; }
   </style>
 </head>
 <body>
 
-  <!-- Login Screen -->
-  <div class="login-card" id="loginView">
-    <h1>☁️ Cloud Platform</h1>
-    <p class="subtitle">Sign in with your ID and password</p>
+  <!-- Initial Loading Screen -->
+  <div id="loadingScreen">Checking session... ☁️</div>
 
-    <form id="loginForm">
-      <label for="userId">ID / Username</label>
-      <input id="userId" type="text" placeholder="Enter your ID" autocomplete="username" required />
+  <!-- AUTH VIEW -->
+  <div class="auth-card" id="authView" style="display: none;">
+    <h1>☁️ Real Cloud</h1>
+    <p class="subtitle" id="authSubtitle">Sign in to your account</p>
+    
+    <div class="error" id="authError"></div>
 
+    <form id="authForm">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.com" required />
+      
       <label for="password">Password</label>
-      <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
-
-      <div class="error" id="errorMsg"></div>
-
-      <button type="submit" class="login-btn">Sign In</button>
+      <input id="password" type="password" placeholder="••••••••" required />
+      
+      <button type="submit" class="btn-full" id="authSubmitBtn">Sign In</button>
     </form>
+
+    <div class="toggle-auth">
+      <span id="toggleAuthMode">Need an account? Register</span>
+    </div>
   </div>
 
-  <!-- Dashboard -->
-  <div class="dashboard" id="dashboardView">
-    <h1>☁️ Cloud Dashboard</h1>
-    <p style="color:#9ca3af;">Welcome back, <span id="currentUser" style="color:#3b82f6; font-weight:bold;"></span></p>
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboardView">
+    <div class="header">
+      <div>
+        <h1>☁️ Your Cloud</h1>
+        <p style="color:#9ca3af; margin:4px 0 0 0; font-size:14px;">Logged in as: <span id="userEmail" style="color:#3b82f6;"></span></p>
+      </div>
+      <button class="btn-secondary btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
 
-    <div class="grid">
-      <div class="card">
-        <h3>🖥️ Cloud Servers</h3>
-        <p>Manage your virtual machine instances.</p>
+    <!-- Storage Meter (Displays 1 TB limit visually) -->
+    <div class="storage-meter-container">
+      <div class="storage-text">
+        <span>Folder Storage Used</span>
+        <span id="storageText">0 KB / 1 TB</span>
       </div>
-      
-      <!-- File Storage Card -->
-      <div class="card">
-        <h3>💾 Object Storage</h3>
-        <p>Upload and manage files (Saved locally).</p>
-        
-        <div class="file-upload-wrapper">
-          <input type="file" id="fileInput" />
-          <button id="uploadBtn">Upload</button>
-        </div>
-        <ul id="fileList">
-          <!-- Uploaded files will appear here -->
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>🗄️ Databases</h3>
-        <p>Create and manage database instances.</p>
-      </div>
-      
-      <div class="card">
-        <h3>📊 Monitoring</h3>
-        <p>View resource usage and metrics.</p>
+      <div class="storage-bar">
+        <div class="storage-fill" id="storageFill"></div>
       </div>
     </div>
 
-    <button class="logout" id="logoutBtn">Sign Out</button>
+    <div class="explorer-container">
+      <div class="toolbar">
+        <button class="btn-secondary btn-sm" id="backBtn" style="display:none;">⬅ Back</button>
+        <input type="text" id="folderNameInput" placeholder="New folder name..." style="flex: 0 1 200px;" />
+        <button class="btn-secondary btn-sm" id="createFolderBtn">Create Folder</button>
+        
+        <input type="file" id="fileInput" style="display: none;" />
+        <button class="btn-sm" id="uploadBtn">Upload File</button>
+      </div>
+
+      <div id="loadingText" style="display:none; color:#9ca3af; text-align:center;">Loading...</div>
+      <ul class="file-list" id="fileList">
+        <!-- Files and folders render here -->
+      </ul>
+    </div>
   </div>
 
-  <script>
-    // ⚠️ DEMO ONLY: Frontend verification (not secure for real apps)
-    const DEMO_ID = "admin";
-    const DEMO_PASSWORD = "123456";
+  <!-- Supabase SDK -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const loginView = document.getElementById("loginView");
-    const dashboardView = document.getElementById("dashboardView");
-    const loginForm = document.getElementById("loginForm");
-    const errorMsg = document.getElementById("errorMsg");
-    const currentUser = document.getElementById("currentUser");
-    const logoutBtn = document.getElementById("logoutBtn");
+    // ⚠️ REPLACE THESE WITH YOUR OWN SUPABASE CREDENTIALS
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
-    // Auth Logic
-    loginForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const id = document.getElementById("userId").value.trim();
-      const password = document.getElementById("password").value;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const BUCKET_NAME = 'files';
+    
+    // UI MOCKUP LIMIT: 1 TB (1,099,511,627,776 bytes)
+    const MAX_STORAGE_BYTES = 1099511627776; 
 
-      if (id === DEMO_ID && password === DEMO_PASSWORD) {
-        errorMsg.textContent = "";
-        currentUser.textContent = id;
-        loginView.style.display = "none";
-        dashboardView.style.display = "block";
-        loadFiles(); // Load saved files when logging in
+    // DOM Elements
+    const loadingScreen = document.getElementById('loadingScreen');
+    const authView = document.getElementById('authView');
+    const dashboardView = document.getElementById('dashboardView');
+    const authForm = document.getElementById('authForm');
+    const authError = document.getElementById('authError');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const toggleAuthMode = document.getElementById('toggleAuthMode');
+    const userEmailSpan = document.getElementById('userEmail');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    const fileList = document.getElementById('fileList');
+    const folderNameInput = document.getElementById('folderNameInput');
+    const createFolderBtn = document.getElementById('createFolderBtn');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const backBtn = document.getElementById('backBtn');
+    const loadingText = document.getElementById('loadingText');
+    const storageText = document.getElementById('storageText');
+    const storageFill = document.getElementById('storageFill');
+
+    // State
+    let isLoginMode = true;
+    let currentUser = null;
+    let currentPath = ''; 
+
+    // --- INITIALIZATION & AUTHENTICATION ---
+    
+    // 1. Check if user is already logged in (Remember Me functionality)
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession();
+      handleAuthState(session);
+    }
+
+    // 2. Listen for login/logout events
+    supabase.auth.onAuthStateChange((event, session) => {
+      handleAuthState(session);
+    });
+
+    function handleAuthState(session) {
+      loadingScreen.style.display = 'none'; // Hide loading screen
+
+      if (session) {
+        currentUser = session.user;
+        userEmailSpan.textContent = currentUser.email;
+        authView.style.display = 'none';
+        dashboardView.style.display = 'block';
+        currentPath = `${currentUser.id}/`; 
+        backBtn.style.display = 'none';
+        loadFiles();
       } else {
-        errorMsg.textContent = "Invalid ID or password.";
+        currentUser = null;
+        authView.style.display = 'block';
+        dashboardView.style.display = 'none';
+        authForm.reset();
+        fileList.innerHTML = '';
+        currentPath = '';
+      }
+    }
+
+    init(); // Run session check on page load
+
+    toggleAuthMode.addEventListener('click', () => {
+      isLoginMode = !isLoginMode;
+      authError.textContent = '';
+      if (isLoginMode) {
+        authSubtitle.textContent = 'Sign in to your account';
+        authSubmitBtn.textContent = 'Sign In';
+        toggleAuthMode.textContent = 'Need an account? Register';
+      } else {
+        authSubtitle.textContent = 'Create a new account';
+        authSubmitBtn.textContent = 'Register';
+        toggleAuthMode.textContent = 'Already have an account? Sign In';
       }
     });
 
-    logoutBtn.addEventListener("click", function () {
-      dashboardView.style.display = "none";
-      loginView.style.display = "block";
-      loginForm.reset();
-      errorMsg.textContent = "";
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authError.textContent = '';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      authSubmitBtn.textContent = 'Processing...';
+      authSubmitBtn.disabled = true;
+
+      try {
+        if (isLoginMode) {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          alert('Registration successful! You are now signed in.');
+        }
+      } catch (error) {
+        authError.textContent = error.message;
+      } finally {
+        authSubmitBtn.textContent = isLoginMode ? 'Sign In' : 'Register';
+        authSubmitBtn.disabled = false;
+      }
     });
 
-    // ==========================================
-    // File Storage Logic (Using LocalStorage)
-    // ==========================================
-    const fileInput = document.getElementById("fileInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const fileList = document.getElementById("fileList");
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+    });
 
-    // Function to render files
-    function loadFiles() {
-      fileList.innerHTML = "";
-      const files = JSON.parse(localStorage.getItem("cloudFiles")) || [];
-      
-      if (files.length === 0) {
-        fileList.innerHTML = "<li>No files uploaded yet.</li>";
+    // --- FILE STORAGE & FOLDER LOGIC ---
+    
+    async function loadFiles() {
+      fileList.innerHTML = '';
+      loadingText.style.display = 'block';
+
+      const { data, error } = await supabase.storage.from(BUCKET_NAME).list(currentPath, {
+        limit: 100, offset: 0, sortBy: { column: 'name', order: 'asc' },
+      });
+
+      loadingText.style.display = 'none';
+
+      if (error) {
+        alert("Error loading files: " + error.message);
         return;
       }
 
-      files.forEach((file, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <div>
-            <div style="color:#e5e7eb;">📄 ${file.name}</div>
-            <div class="file-meta">${(file.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <button onclick="deleteFile(${index})" style="background:#ef4444; padding:4px 8px; font-size:12px; border-radius:6px;">X</button>
-        `;
-        fileList.appendChild(li);
-      });
-    }
-
-    // Function to handle file upload
-    uploadBtn.addEventListener("click", () => {
-      const file = fileInput.files[0];
-      if (!file) return alert("Please select a file first.");
-
-      // GitHub pages / LocalStorage has a strict size limit (usually ~5MB total)
-      if (file.size > 2 * 1024 * 1024) {
-        return alert("File is too large! Please select a file under 2MB for this demo.");
+      if (data.length === 0) {
+        fileList.innerHTML = '<li style="justify-content:center; color:#6b7280; padding: 20px;">This folder is empty.</li>';
+        updateStorageMeter(0); // Reset meter if empty
+        return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const fileData = {
-          name: file.name,
-          size: file.size,
-          data: e.target.result // Base64 string
-        };
+      let currentFolderSize = 0;
 
-        const existingFiles = JSON.parse(localStorage.getItem("cloudFiles")) || [];
-        existingFiles.push(fileData);
-        
-        try {
-          localStorage.setItem("cloudFiles", JSON.stringify(existingFiles));
-          fileInput.value = ""; // clear input
-          loadFiles(); // refresh list
-        } catch (err) {
-          alert("Storage is full! Please delete some files.");
+      data.forEach(item => {
+        const li = document.createElement('li');
+        const isFolder = item.id === null;
+
+        if (isFolder) {
+          li.className = 'folder-item';
+          li.innerHTML = `
+            <div class="file-info" onclick="navigateFolder('${item.name}')">
+              <span>📁 ${item.name}</span>
+            </div>
+          `;
+        } else {
+          const size = item.metadata.size;
+          currentFolderSize += size; // Add to folder total
+
+          li.innerHTML = `
+            <div class="file-info">
+              <span>📄 ${item.name}</span>
+              <span class="badge">${(size / 1024).toFixed(1)} KB</span>
+            </div>
+            <div>
+               <a href="${getPublicUrl(currentPath + item.name)}" target="_blank" style="color:#3b82f6; text-decoration:none; font-size:13px; margin-right:10px;">Download</a>
+               <button class="btn-secondary btn-sm" onclick="deleteFile('${item.name}')" style="background:#ef4444; padding:4px 8px; font-size:12px;">X</button>
+            </div>
+          `;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+        fileList.appendChild(li);
+      });
 
-    // Global function to delete a file
-    window.deleteFile = function(index) {
-      const files = JSON.parse(localStorage.getItem("cloudFiles")) || [];
-      files.splice(index, 1);
-      localStorage.setItem("cloudFiles", JSON.stringify(files));
+      // Update the storage meter based on current folder size
+      updateStorageMeter(currentFolderSize);
+    }
+
+    function updateStorageMeter(usedBytes) {
+      // Convert bytes to a readable format
+      let usedText = "";
+      if (usedBytes === 0) usedText = "0 KB";
+      else if (usedBytes < 1024 * 1024) usedText = (usedBytes / 1024).toFixed(1) + " KB";
+      else usedText = (usedBytes / (1024 * 1024)).toFixed(2) + " MB";
+
+      storageText.textContent = `${usedText} / 1 TB`;
+      
+      // Calculate percentage
+      let percentage = (usedBytes / MAX_STORAGE_BYTES) * 100;
+      if (percentage < 1) percentage = 1; // Make sure a tiny file shows at least a sliver
+      if (percentage > 100) percentage = 100;
+      
+      storageFill.style.width = `${percentage}%`;
+    }
+
+    window.navigateFolder = (folderName) => {
+      currentPath += `${folderName}/`;
+      backBtn.style.display = 'inline-block';
       loadFiles();
     };
+
+    backBtn.addEventListener('click', () => {
+      const parts = currentPath.split('/').filter(p => p !== '');
+      parts.pop(); 
+      
+      if (parts.length <= 1) { 
+        currentPath = `${currentUser.id}/`;
+        backBtn.style.display = 'none';
+      } else {
+        currentPath = parts.join('/') + '/';
+      }
+      loadFiles();
+    });
+
+    createFolderBtn.addEventListener('click', async () => {
+      const folderName = folderNameInput.value.trim();
+      if (!folderName) return alert("Enter a folder name.");
+      
+      const dummyFile = new File([''], '.placeholder', { type: 'text/plain' });
+      const { error } = await supabase.storage.from(BUCKET_NAME).upload(`${currentPath}${folderName}/.placeholder`, dummyFile);
+      
+      if (error) alert("Error creating folder: " + error.message);
+      else {
+        folderNameInput.value = '';
+        loadFiles();
+      }
+    });
+
+    uploadBtn.addEventListener('click', () => {
+      fileInput.click(); 
+    });
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const originalText = uploadBtn.textContent;
+      uploadBtn.textContent = 'Uploading...';
+      uploadBtn.disabled = true;
+
+      // Note: Supabase Free tier enforces a 50MB per-file limit and 1GB total limit.
+      const { error } = await supabase.storage.from(BUCKET_NAME).upload(`${currentPath}${file.name}`, file);
+
+      uploadBtn.textContent = originalText;
+      uploadBtn.disabled = false;
+      fileInput.value = ''; 
+
+      if (error) alert("Upload failed: " + error.message + "\n(Note: Free Supabase limit is usually 50MB per file).");
+      else loadFiles();
+    });
+
+    window.deleteFile = async (fileName) => {
+      if (!confirm(`Delete ${fileName}?`)) return;
+      const { error } = await supabase.storage.from(BUCKET_NAME).remove([`${currentPath}${fileName}`]);
+      if (error) alert("Delete failed: " + error.message);
+      else loadFiles();
+    };
+
+    function getPublicUrl(filePath) {
+      const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+      return data.publicUrl;
+    }
+
   </script>
 </body>
 </html>
